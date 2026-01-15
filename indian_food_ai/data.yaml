@@ -1,0 +1,4 @@
+train: ../images/train
+val: ../images/val
+nc: 60
+names: ['masala_dosa', 'chicken_biryani', 'potato', 'atta', ...]

@@ -1,0 +1,9 @@
+Django==5.0.1
+djangorestframework==3.14.0
+django-cors-headers==4.3.1
+drf-spectacular==0.27.0
+ultralytics==8.0.227
+opencv-python==4.9.0.80
+pandas==2.1.4
+python-decouple==3.8
+drf-spectacular==0.27.*

@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Indian-Food-AI</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container py-4">
+  <h1>Snap / upload your plate</h1>
+  <div class="row">
+    <div class="col-md-6">
+      <video id="cam" autoplay class="w-100 border"></video>
+      <button id="snap" class="btn btn-primary mt-2">Analyse</button>
+      <input type="file" id="file" class="form-control mt-2">
+    </div>
+    <div class="col-md-6">
+      <canvas id="canvas" width="640" height="480" class="d-none"></canvas>
+      <pre id="out" class="mt-2"></pre>
+    </div>
+  </div>
+<script>
+const cam = document.getElementById('cam');
+const canvas = document.getElementById('canvas');
+const out = document.getElementById('out');
+navigator.mediaDevices.getUserMedia({video:true}).then(s=>cam.srcObject=s);
+
+document.getElementById('snap').onclick = async () => {
+  canvas.getContext('2d').drawImage(cam,0,0);
+  await predict(canvas);
+};
+document.getElementById('file').onchange = async (e) => {
+  const img = new Image();
+  img.src = URL.createObjectURL(e.target.files[0]);
+  img.onload = async () => { canvas.getContext('2d').drawImage(img,0,0); await predict(canvas); };
+};
+async function predict(canv) {
+  const blob = await new Promise(r => canv.toBlob(r, 'image/jpeg'));
+  const reader = new FileReader();
+  reader.readAsDataURL(blob);
+  reader.onload = async () => {
+    const base64 = reader.result.split(',')[1];
+    const res = await fetch('/api/v1/predict/', {
+      method:'POST',
+      headers:{'Content-Type':'application/json', 'X-CSRFToken': '{{csrf_token}}'},
+      body: JSON.stringify({image:base64})
+    }).then(r=>r.json());
+    out.textContent = JSON.stringify(res, null, 2);
+  };
+}
+</script>
+</body>
+</html>
